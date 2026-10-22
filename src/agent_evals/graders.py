@@ -12,7 +12,7 @@ from typing import Any, Callable
 
 from .case import Case, Turn
 
-_NUM_RE = re.compile(r"(?<!\w)[+-]?\d+(?:[.,]\d+)*(?!\w)")
+_NUM_RE = re.compile(r"(?<!\w)(?<![A-Za-z]-)[+-]?\d+(?:[.,]\d+)*(?!\w)")
 
 _ES_STOPWORDS = frozenset(
     "a al de del la el le lo las los les un una unos unas y o u en con por para que se su sus tu tus es son esta "
@@ -111,6 +111,9 @@ def tool_usage(case: Case, turns: list[Turn]) -> CheckResult:
     return CheckResult("tool_usage", False, "; ".join(problems))
 
 
+ToolCallArgPair = dict[str, Any]
+
+
 def _args_match(actual: dict[str, Any], expected_subset: dict[str, Any]) -> bool:
     return all(key in actual and (actual[key] == value or str(actual[key]) == str(value)) for key, value in expected_subset.items())
 
@@ -132,9 +135,6 @@ def tool_args(case: Case, turns: list[Turn]) -> CheckResult:
             f"{tool}: no call with args {dict(expected_subset)}",
         )
     return CheckResult("tool_args", True, "argument subsets match")
-
-
-ToolCallArgPair = dict[str, Any]
 
 
 def numeric_grounding(case: Case, turns: list[Turn]) -> CheckResult:

@@ -6,7 +6,7 @@ import argparse
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Callable, TextIO
+from typing import Callable, Sequence
 
 from agent_evals.case import Case, load_cases
 from agent_evals.report import render_report, write_json_report
@@ -24,7 +24,7 @@ def _parse_agent_spec(spec: str) -> (str, str):
 
 def _load_agent(spec: str) -> AgentFunction:
     path, factory_name = _parse_agent_spec(spec)
-    module_name = "agent_evals_external_agent"
+    module_name = f"agent_evals_external_{id(path)}"
     agent_path = Path(path)
     if not agent_path.exists():
         raise FileNotFoundError(f"agent module not found: {path}")
@@ -53,7 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: TextIO | list[str] | None = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         cases = load_cases(args.cases)

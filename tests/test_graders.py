@@ -99,6 +99,13 @@ class NumericGroundingTests(unittest.TestCase):
         self.assertFalse(result.passed)
         self.assertIn("5555", result.detail)
 
+    def test_ignores_numbers_glued_to_letters_or_hyphens(self):
+        case = _case()
+        call = ToolCall(name="kb_search", args={}, result="reembolso 1234: aprobado")
+        turns = [Turn(prompt="p", response="Modelo GPT-4 y h2o detectados, sin cifras sueltas.", tool_calls=[call])]
+        result = numeric_grounding(case, turns)
+        self.assertTrue(result.passed, result.detail)
+
 
 class FactGroundingTests(unittest.TestCase):
     def _turns(self, response):
