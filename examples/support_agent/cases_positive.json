@@ -1,0 +1,36 @@
+[
+  {
+    "id": "refund-status-number",
+    "prompt": "¿Cuál es el estado de mi reembolso?",
+    "expected_tools": [
+      "kb_search"
+    ],
+    "expected_tool_args": {
+      "kb_search": {
+        "query": "¿Cuál es el estado de mi reembolso?"
+      }
+    },
+    "expected_numbers": [
+      "1234"
+    ],
+    "expected_facts": [
+      "reembolso 1234 fue aprobado"
+    ],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "¿Cuál es el estado de mi reembolso?",
+        "response": "Tu reembolso 1234 fue aprobado y llega como minimo el 3 de marzo. Gracias por tu paciencia.",
+        "tool_calls": [
+          {
+            "name": "kb_search",
+            "args": {
+              "query": "¿Cuál es el estado de mi reembolso?"
+            },
+            "result": "El reembolso 1234 fue aprobado el 3 de marzo."
+          }
+        ]
+      }
+    ]
+  }
+]
