@@ -19,7 +19,7 @@ PYTHONPATH=src python3 -m agent_evals.cli examples/support_agent/cases_positive.
   --agent examples/support_agent/agent.py:build_agent --threshold 1.0
 
 # Write a machine-readable report for CI logs and dashboards
-PYTHONPATH=src python3 -m agent_evals.cli cases.json --threshold 0.8 --report report.json
+PYTHONPATH=src python3 -m agent_evals.cli examples/support_agent/cases.json --threshold 0.8 --report report.json
 ```
 
 Exit codes: `0` when the pass rate meets the threshold; `1` otherwise, on a
