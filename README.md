@@ -25,6 +25,50 @@ PYTHONPATH=src python3 -m agent_evals.cli cases.json --threshold 0.8 --report re
 Exit codes: `0` when the pass rate meets the threshold; `1` otherwise, on a
 loading error, or when the suite is empty (an empty suite checks nothing).
 
+## How it works
+
+```mermaid
+flowchart LR
+    A[Golden Case JSON] --> B{Mode}
+    B -->|Replay| C[Recorded turns]
+    B -->|Agent| D[Run the real agent]
+    D --> E[Produced transcript]
+    C --> F[Transcript to grade]
+    E --> F
+    F --> G[6 Graders]
+    G --> H[SuiteReport]
+    H --> I{pass_rate >= threshold?}
+    I -->|Yes| J[exit 0 · CI green]
+    I -->|No| K[exit 1 · CI red + exact reason]
+
+    style J fill:#d4edda
+    style K fill:#f8d7da
+```
+
+Each case runs through all six graders in parallel; every grader returns a
+`CheckResult` with a reason. The runner aggregates them into a `SuiteReport`
+and exits non-zero when the pass rate drops below the threshold.
+
+```mermaid
+flowchart TB
+    T[Transcript] --> G1[tool_usage]
+    T --> G2[tool_args]
+    T --> G3[numeric_grounding]
+    T --> G4[fact_grounding]
+    T --> G5[no_forbidden_content]
+    T --> G6[language]
+    G1 & G2 & G3 & G4 & G5 & G6 --> R[CheckResult per grader]
+    R --> V{All passed?}
+    V -->|Yes| P[CaseResult.passed = true]
+    V -->|No| F[CaseResult.passed = false + detail]
+    P & F --> S[SuiteReport → exit_code]
+```
+
+Two modes:
+
+- **Replay** (no agent, no network): grades recorded transcripts. Deterministic, cheap, safe to gate every PR.
+- **Agent** (`--agent file.py:factory`): runs your agent live, grades what it produces, and compares against the same expectations.
+
 ## Cases
 
 A case is a JSON object. The scenario lives in `prompt` and the expected
