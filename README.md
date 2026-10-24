@@ -123,11 +123,54 @@ PYTHONPATH=src python3 -m agent_evals.cli cases.json --threshold 0.8   # CI gate
 `.github/workflows/ci.yml` runs the test suite on Python 3.11 and 3.13 with no
 install step. Any CI step can call the CLI and read its exit code.
 
+## How your agent connects
+
+The harness **is not the agent**. The harness is the *tester*; your agent is the
+*function under test*. Like pytest testing a function: the test doesn't know how
+it's implemented, it only checks the result.
+
+```
+┌─────────────────────┐         ┌──────────────────────┐
+│   YOUR AGENT        │         │   HARNESS            │
+│   (your code)       │         │   (agent-evals)      │
+│                     │         │                      │
+│  - model            │  ────►  │  - golden cases      │
+│  - prompt           │  Turn[] │  - 6 graders         │
+│  - tools, API keys  │         │  - runner + threshold│
+│                     │         │                      │
+│  All of this is     │         │  The harness knows   │
+│  YOURS. The harness │         │  nothing about your  │
+│  knows nothing      │         │  agent. It only sees │
+│  about it.          │         │  the transcript.     │
+└─────────────────────┘         └──────────────────────┘
+```
+
+The only contract between the two is a function:
+
+```python
+def build_agent() -> Callable[[Case], list[Turn]]:
+    def agent(case: Case) -> list[Turn]:
+        # Do whatever you want in here:
+        # call Gemini, Claude, your API, use LangGraph...
+        result = my_agent.run(case.prompt)
+        return [Turn(
+            prompt=case.prompt,
+            response=result.text,
+            tool_calls=result.tool_calls,
+        )]
+    return agent
+```
+
+Your agent can change models, frameworks, prompts, tools — the harness doesn't
+care. It only notices if the **transcript** (what the agent said and which
+tools it called) stops meeting the golden case's contract.
+
 ## Wiring a real agent
 
 `--agent <path>:<factory>` loads a Python module and calls its factory to get
 an `agent(case) -> list[Turn]` callable. Design notes and the contract
 invariants live in `examples/wiring_real_agent.md`.
+
 
 ## Limits
 
