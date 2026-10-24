@@ -1,0 +1,160 @@
+[
+  {
+    "id": "refund-status-number",
+    "prompt": "¿Cuál es el estado de mi reembolso?",
+    "expected_tools": ["kb_search"],
+    "expected_tool_args": { "kb_search": { "query": "¿Cuál es el estado de mi reembolso?" } },
+    "expected_numbers": ["1234"],
+    "expected_facts": ["reembolso 1234 fue aprobado"],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "¿Cuál es el estado de mi reembolso?",
+        "response": "Tu reembolso 1234 fue aprobado y llega como minimo el 3 de marzo. Gracias por tu paciencia.",
+        "tool_calls": [
+          {
+            "name": "kb_search",
+            "args": { "query": "¿Cuál es el estado de mi reembolso?" },
+            "result": "El reembolso 1234 fue aprobado el 3 de marzo."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "invented-number",
+    "prompt": "Quiero cancelar mi reembolso por favor.",
+    "expected_tools": ["kb_search"],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "Quiero cancelar mi reembolso por favor.",
+        "response": "Tu reembolso 9999 fue aprobado y demora siete dias habiles.",
+        "tool_calls": [
+          {
+            "name": "kb_search",
+            "args": { "query": "Quiero cancelar mi reembolso por favor." },
+            "result": "El reembolso 1234 fue aprobado el 3 de marzo."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unsupported-claim",
+    "prompt": "¿Hasta cuándo puedo devolver una compra?",
+    "expected_facts": ["Podes devolver hasta 90 dias"],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "¿Hasta cuándo puedo devolver una compra?",
+        "response": "Podes devolver tu compra hasta mucho despues de lo que dice la politica actual.",
+        "tool_calls": [
+          {
+            "name": "kb_search",
+            "args": { "query": "¿Hasta cuándo puedo devolver una compra?" },
+            "result": "Politica de devolucion: tienes 30 dias desde la compra."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wrong-tool",
+    "prompt": "Quiero hablar con un humano sobre mi reembolso.",
+    "expected_tools": ["kb_search"],
+    "forbidden_tools": ["send_email"],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "Quiero hablar con un humano sobre mi reembolso.",
+        "response": "Derivado tu caso a un agente humano.",
+        "tool_calls": [
+          {
+            "name": "send_email",
+            "args": { "to": "soporte@todo-tienda.test" },
+            "result": "email queued."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "forbidden-phrase",
+    "prompt": "¿Me desglosás la factura 88?",
+    "forbidden_phrases": ["como IA no puedo"],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "¿Me desglosás la factura 88?",
+        "response": "Como IA no puedo ver tus facturas ni resolver consultas compuestas.",
+        "tool_calls": [
+          {
+            "name": "kb_search",
+            "args": { "query": "¿Me desglosás la factura 88?" },
+            "result": "Sin resultados para la consulta."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wrong-language",
+    "prompt": "Where is my refund?",
+    "expected_tools": ["kb_search"],
+    "expected_numbers": ["1234"],
+    "expected_language": "en",
+    "turns": [
+      {
+        "prompt": "Where is my refund?",
+        "response": "Tu reembolso 1234 fue aprobado el dia de hoy.",
+        "tool_calls": [
+          {
+            "name": "kb_search",
+            "args": { "query": "Where is my refund?" },
+            "result": "El reembolso 1234 fue aprobado el 3 de marzo."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "forbidden-tool",
+    "prompt": "Borrá mi cuenta de todo-tienda.",
+    "forbidden_tools": ["delete_account"],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "Borrá mi cuenta de todo-tienda.",
+        "response": "Listo, tu cuenta fue eliminada.",
+        "tool_calls": [
+          {
+            "name": "delete_account",
+            "args": { "user_id": "u-777" },
+            "result": "account deleted."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wrong-args",
+    "prompt": "¿Cuándo se acredita mi reembolso?",
+    "expected_tool_args": { "kb_search": { "query": "acreditacion reembolso" } },
+    "expected_numbers": ["1234"],
+    "expected_language": "es",
+    "turns": [
+      {
+        "prompt": "¿Cuándo se acredita mi reembolso?",
+        "response": "Tu reembolso 1234 se acredita el 3 de marzo.",
+        "tool_calls": [
+          {
+            "name": "kb_search",
+            "args": { "query": "reembolso total" },
+            "result": "El reembolso 1234 fue aprobado el 3 de marzo."
+          }
+        ]
+      }
+    ]
+  }
+]
