@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Deterministic evaluation harness for LLM agents: golden cases, verifiable graders, a pass-rate threshold. No LLM judge."
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-authors = [{ name = "Ramiro Cerda" }]
+authors = [{ name = "Ramiro Cerdá" }]
 readme = "README.md"
 keywords = ["llm", "agents", "evals", "testing", "ci", "deterministic"]
 
