@@ -12,3 +12,5 @@ reports/
 .DS_Store
 report.json
 .env
+.atl/
+.cachebro/
