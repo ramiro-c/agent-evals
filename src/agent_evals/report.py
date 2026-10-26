@@ -49,6 +49,17 @@ def write_json_report(report: SuiteReport, path: str | Path) -> Path:
                     {"check": check.check, "passed": check.passed, "detail": check.detail}
                     for check in result.checks
                 ],
+                "turns": [
+                    {
+                        "prompt": turn.prompt,
+                        "response": turn.response,
+                        "tool_calls": [
+                            {"name": call.name, "args": call.args, "result": call.result}
+                            for call in turn.tool_calls
+                        ],
+                    }
+                    for turn in result.turns
+                ],
             }
             for result in report.results
         ],

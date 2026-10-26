@@ -40,6 +40,11 @@ class RunnerModeTests(unittest.TestCase):
         self.assertEqual(len(report.results[0].checks), len(ALL_GRADERS))
         self.assertTrue(report.results[0].passed)
 
+    def test_case_result_keeps_the_graded_turns(self):
+        case = _case()
+        report = run_suite([case], _agent_turns)
+        self.assertEqual(report.results[0].turns, _agent_turns(case))
+
     def test_replay_mode_without_agent(self):
         case = _case()
         case = replace(case, turns=_good_turns(case))

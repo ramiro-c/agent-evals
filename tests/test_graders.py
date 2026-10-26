@@ -58,6 +58,25 @@ class ToolArgsTests(unittest.TestCase):
         result = tool_args(case, [Turn(prompt="p", response="r", tool_calls=[call])])
         self.assertFalse(result.passed)
         self.assertIn("query", result.detail)
+        self.assertIn("factura", result.detail)
+
+    def test_contains_matcher_accepts_rephrased_query(self):
+        case = _case(expected_tool_args={"kb_search": {"query": {"contains": ["Reembolso", "estado"]}}})
+        call = ToolCall(name="kb_search", args={"query": "estado del REEMBOLSO"}, result="x")
+        result = tool_args(case, [Turn(prompt="p", response="r", tool_calls=[call])])
+        self.assertTrue(result.passed, result.detail)
+
+    def test_contains_matcher_is_accent_insensitive(self):
+        case = _case(expected_tool_args={"kb_search": {"query": {"contains": ["devolucion"]}}})
+        call = ToolCall(name="kb_search", args={"query": "política de devolución"}, result="x")
+        result = tool_args(case, [Turn(prompt="p", response="r", tool_calls=[call])])
+        self.assertTrue(result.passed, result.detail)
+
+    def test_contains_matcher_fails_when_a_term_is_missing(self):
+        case = _case(expected_tool_args={"kb_search": {"query": {"contains": ["reembolso", "estado"]}}})
+        call = ToolCall(name="kb_search", args={"query": "reembolso"}, result="x")
+        result = tool_args(case, [Turn(prompt="p", response="r", tool_calls=[call])])
+        self.assertFalse(result.passed)
 
     def test_number_and_string_argument_values_match(self):
         case = _case(expected_tool_args={"calc": {"expression": 4242}})

@@ -114,8 +114,16 @@ def tool_usage(case: Case, turns: list[Turn]) -> CheckResult:
 ToolCallArgPair = dict[str, Any]
 
 
+def _value_matches(actual: Any, expected: Any) -> bool:
+    """Literal values compare exactly; {"contains": [...]} requires every term (case/accent-insensitive)."""
+    if isinstance(expected, dict) and set(expected) == {"contains"}:
+        haystack = match_text(str(actual))
+        return all(match_text(str(term)) in haystack for term in expected["contains"])
+    return actual == expected or str(actual) == str(expected)
+
+
 def _args_match(actual: dict[str, Any], expected_subset: dict[str, Any]) -> bool:
-    return all(key in actual and (actual[key] == value or str(actual[key]) == str(value)) for key, value in expected_subset.items())
+    return all(key in actual and _value_matches(actual[key], value) for key, value in expected_subset.items())
 
 
 def tool_args(case: Case, turns: list[Turn]) -> CheckResult:
@@ -132,7 +140,7 @@ def tool_args(case: Case, turns: list[Turn]) -> CheckResult:
         return CheckResult(
             "tool_args",
             False,
-            f"{tool}: no call with args {dict(expected_subset)}",
+            f"{tool}: no call with args {dict(expected_subset)}; got {candidates}",
         )
     return CheckResult("tool_args", True, "argument subsets match")
 

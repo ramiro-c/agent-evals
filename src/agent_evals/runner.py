@@ -14,12 +14,13 @@ AgentFunction = Callable[[Case], list[Turn]]
 class CaseResult:
     """All grader outcomes for one case, plus the derived verdict."""
 
-    __slots__ = ("case_id", "checks", "passed")
+    __slots__ = ("case_id", "checks", "passed", "turns")
 
-    def __init__(self, case_id: str, checks: Sequence[CheckResult]) -> None:
+    def __init__(self, case_id: str, checks: Sequence[CheckResult], turns: Sequence[Turn] = ()) -> None:
         self.case_id = case_id
         self.checks: list[CheckResult] = list(checks)
         self.passed = all(check.passed for check in self.checks)
+        self.turns: list[Turn] = list(turns)
 
 
 class SuiteReport:
@@ -82,5 +83,5 @@ def run_suite(
         else:
             produced = agent(case)
         checks = [grader(case, produced) for grader in ALL_GRADERS]
-        collected.append(CaseResult(case.id, checks))
+        collected.append(CaseResult(case.id, checks, produced))
     return SuiteReport(collected, threshold)

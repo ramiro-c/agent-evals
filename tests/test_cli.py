@@ -54,6 +54,25 @@ class CliTests(unittest.TestCase):
             case_ids = {c["id"] for c in data["cases"]}
             self.assertIn("refund-status-number", case_ids)
 
+    def test_json_report_includes_graded_transcript(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "report.json"
+            _run(str(PASS_ONLY), "--threshold", "1.0", "--report", str(out))
+            case = json.loads(out.read_text(encoding="utf-8"))["cases"][0]
+            turn = case["turns"][0]
+            self.assertEqual(turn["prompt"], "¿Cuál es el estado de mi reembolso?")
+            self.assertIn("reembolso 1234", turn["response"])
+            self.assertEqual(
+                turn["tool_calls"],
+                [
+                    {
+                        "name": "kb_search",
+                        "args": {"query": "¿Cuál es el estado de mi reembolso?"},
+                        "result": "El reembolso 1234 fue aprobado el 3 de marzo.",
+                    }
+                ],
+            )
+
     def test_missing_agent_for_never_recorded_case_errors(self):
         bad = {"id": "no-turns", "prompt": "p", "expected_language": "es"}
         with tempfile.TemporaryDirectory() as tmp:

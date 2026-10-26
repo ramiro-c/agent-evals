@@ -82,7 +82,7 @@ replay mode.
 | `turns` | Recorded turns: each has `prompt`, `response`, `tool_calls` (`name`, `args`, `result`). |
 | `expected_tools` | Every listed tool must be called at least once. |
 | `forbidden_tools` | None of these tools may ever be called. |
-| `expected_tool_args` | Per tool, an argument subset that at least one call must satisfy. |
+| `expected_tool_args` | Per tool, an argument subset that at least one call must satisfy. A value is matched exactly, or use `{"contains": ["term", ...]}` to require every term (case- and accent-insensitive). |
 | `expected_numbers` | Numbers that must all appear in the response. |
 | `expected_facts` | Phrases that must appear in the response **and** in some tool result. |
 | `forbidden_phrases` | Phrases that must never appear (case-, accent- and punctuation-insensitive). |
@@ -170,6 +170,28 @@ tools it called) stops meeting the golden case's contract.
 `--agent <path>:<factory>` loads a Python module and calls its factory to get
 an `agent(case) -> list[Turn]` callable. Design notes and the contract
 invariants live in `examples/wiring_real_agent.md`.
+
+### Live LLM example (OpenRouter)
+
+`examples/openrouter_agent/agent.py` is a real tool-calling agent over the same
+fake knowledge base and tools as the synthetic example, served through
+OpenRouter (stdlib `urllib`, no SDK). Set `OPENROUTER_API_KEY` in the
+environment or in a `.env` file at the repo root (`.env` is git-ignored), and
+optionally `OPENROUTER_MODEL` (defaults to `nvidia/nemotron-3.5-lightning:free`).
+
+```bash
+PYTHONPATH=src python3 -m agent_evals.cli examples/support_agent/cases_positive.json \
+  --agent examples/openrouter_agent/agent.py:build_agent --threshold 1.0 --report report.json
+```
+
+Free models share upstream quota, so the agent retries 429/5xx with backoff
+(honoring `Retry-After`). The output is not deterministic: a real model
+rephrases tool queries, which is why the case uses
+`{"contains": ["reembolso"]}` instead of an exact query.
+
+The JSON report includes each case's graded `turns` (prompt, response, tool
+calls with args and results), so a live run can be inspected and pasted back
+into a case file for replay.
 
 
 ## Limits
